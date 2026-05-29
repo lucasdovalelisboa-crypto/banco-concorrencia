@@ -177,6 +177,27 @@ Diversas operações foram sobrescritas durante a execução concorrente, causan
 
 ---
 
+---
+
+# Evidências dos testes
+
+## Configuração do JMeter
+
+![Configuração JMeter](imagens/jmeter-config.png)
+
+---
+
+## Execução do H2 Inicial
+
+![Execução JMeter](imagens/h2inicial.png)
+
+---
+
+## Resultado inconsistente no H2
+
+![Resultado H2](imagens/h2final.png)
+
+
 # Parte 2 — Controle de Versão Otimista
 
 (Espaço reservado para implementação do Aluno B)
