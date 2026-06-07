@@ -167,3 +167,37 @@ O problema ocorre porque:
 
 **Solução** (Aluno B): Utilizar `@Lock(LockModeType.PESSIMISTIC_WRITE)` ou
 `@Version` (Optimistic Locking) para garantir acesso serializado ao registro.
+
+
+#### 8. Configurando o JMeter para a Conta Versionada
+Para comprovar o funcionamento da solução, criamos um novo cenário apontando para os novos endpoints implementados.
+
+**A) Configurar o Novo Thread Group**
+* No JMeter, foi criado um novo **Thread Group** (Cenário 2 - Controle Otimista) para simular o ataque à nova API.
+* Os parâmetros de estresse foram intensificados e configurados para rodarem saques e depósitos simultaneamente:
+  * **Number of Threads (users):** 100
+  * **Ramp-Up Period (seconds):** 1
+  * **Loop Count:** 10
+
+**B) Alterar os Endpoints (Paths)**
+As requisições HTTP foram adaptadas para acessar a entidade controlada.
+* **HTTP Request (Depósito):** O Path mudou de `/contas/1/deposito` para `/contas-versionadas/1/deposito`
+* **HTTP Request (Saque):** O Path mudou de `/contas/1/saque` para `/contas-versionadas/1/saque`
+
+**C) Configuração do Header (HTTP Header Manager)**
+Para que a requisição POST envie o corpo (body) no formato JSON corretamente sem causar erros de formatação no Spring Boot, é obrigatório adicionar um Gerenciador de Cabeçalhos.
+
+**Passo a passo para adicionar:**
+1. Clique com o botão direito sobre o seu **Thread Group** (ou diretamente sobre a sua Requisição HTTP).
+2. Vá em **Add** (Adicionar) > **Config Element** (Elemento de Configuração) > **HTTP Header Manager** (Gerenciador de Cabeçalhos HTTP).
+3. Na tela do *HTTP Header Manager*, clique no botão **Add** (Adicionar) localizado na parte inferior.
+4. Preencha os campos da nova linha que aparecerá da seguinte forma:
+   * **Name:** `Content-Type`
+   * **Value:** `application/json`
+
+*Nota: Se você adicionar o Header Manager diretamente no nível do Thread Group, ele aplicará essa configuração automaticamente para as duas requisições (Depósito e Saque).*
+
+**D) Execução e Análise via Summary Report**
+* Diferente do cenário sem controle que retornava 100% de status "200 OK" mascarando os erros (Lost Update), a configuração da Conta Versionada barra ativamente a sobrescrita.
+* Ao checar o listener **Summary Report**, a leitura dos erros demonstra a proteção em funcionamento: as requisições que causam colisão de concorrência falham com **Erro HTTP 409 (Conflict)**, garantindo que o saldo seja calculado apenas em cima das requisições seguras.
+```

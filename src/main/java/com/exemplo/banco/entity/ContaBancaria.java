@@ -27,7 +27,8 @@ public class ContaBancaria {
      */
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal saldo;
-
+    
+    
     // Construtores
     public ContaBancaria() {}
 
